@@ -18,19 +18,21 @@ type Ingredient struct {
 }
 
 func getRecipes(c echo.Context) error {
-	dynamoClient := getClient()
-	/* recipe := Recipe{Title: "torta", Ingredients: []Ingredient{{
-		Name: "sugar", Price: 2, Unit: "kg",
-	}}} */
-	rec := GetRecipes(dynamoClient)
+	// dynamoClient := getClient()
+	recipe := Recipe{Title: "torta", Ingredients: []Ingredient{{
+		Name: "apple", Price: 2, Unit: "kg",
+	}, {
+		Name: "butter", Price: 2, Unit: "kg",
+	}}}
+	// rec := GetRecipes(dynamoClient)
 
-	return c.JSON(http.StatusOK, rec)
+	return c.JSON(http.StatusOK, recipe)
 }
 
 func createRecipe(c echo.Context) error {
 	title := c.FormValue("title")
 	recipe := Recipe{Title: title, Ingredients: []Ingredient{{
-		Name: "sugar", Price: 2, Unit: "kg",
+		Name: "apple", Price: 2, Unit: "kg",
 	}}}
 	return c.JSON(http.StatusOK, recipe)
 }
@@ -39,5 +41,5 @@ func main() {
 	e := echo.New()
 	e.GET("/recipes", getRecipes)
 	e.POST("/recipe", createRecipe)
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":8080"))
 }

@@ -1,17 +1,16 @@
 
 services:
   recipes-api:
-    build:
-      dockerfile: Dockerfile
-      context: ./
+    build: .
     ports:
       - "8080:8080"
     depends_on:
       - mongo
     volumes:
-      - ./:/app
+      - .:/app
     environment:
-      - MONGO_URI=mongodb://mongo:27017/mydatabase
+      - MONGO_URI=mongodb://mongo:27017/recipes-api
+      - AIR_GO_CMD=go run main.go 
     networks:
       - app-network
 

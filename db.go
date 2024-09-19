@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"log"
+	"os"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Project struct {
@@ -17,22 +17,24 @@ type Project struct {
 	Stack       []string `json:"stack"`
 }
 
-func getClient() *dynamodb.Client {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+func getClient() *mongo.Client {
+	uri := os.Getenv("MONGO_URI")
+	client, err := mongo.Connect(context.TODO(), options.Client().
+		ApplyURI(uri))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	dynamoClient := dynamodb.NewFromConfig(cfg)
-	return dynamoClient
+	return client
 }
 
-func GetRecipes(dynamoClient *dynamodb.Client) []Project {
-	response, err := dynamoClient.Scan(context.TODO(), &dynamodb.ScanInput{TableName: aws.String(("projects"))})
-	println(response)
-	projects := []Project{}
-	err = attributevalue.UnmarshalListOfMaps(response.Items, &projects)
+func GetRecipes() []primitive.M {
+	client := getClient()
+	cur, err := client.Database("recipes-api").Collection("recipe").Find(context.TODO(), bson.M{})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	return projects
+
+	var results []bson.M
+	err = cur.All(context.TODO(), &results)
+	return results
 }
